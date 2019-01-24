@@ -40,7 +40,7 @@ func PagedSelect(
 	)
 
 	if err := sqlx.Get(db, &total, countQuery, args...); err != nil {
-		return nil, handlePostgresError(err, "select error")
+		return nil, HandleError(err, "select error")
 	}
 
 	var (
@@ -49,7 +49,7 @@ func PagedSelect(
 	)
 
 	if err := sqlx.Select(db, target, limitQuery, limitArgs...); err != nil {
-		return nil, handlePostgresError(err, "select error")
+		return nil, HandleError(err, "select error")
 	}
 
 	return &PagedResultMeta{
