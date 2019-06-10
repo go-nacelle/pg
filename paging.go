@@ -1,4 +1,4 @@
-package nacellepg
+package pgutil
 
 import (
 	"fmt"

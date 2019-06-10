@@ -1,4 +1,4 @@
-package nacellepg
+package pgutil
 
 type Config struct {
 	DatabaseURL   string `env:"database_url" required:"true"`

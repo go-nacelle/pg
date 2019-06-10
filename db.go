@@ -1,11 +1,11 @@
-package nacellepg
+package pgutil
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/efritz/nacelle"
+	"github.com/go-nacelle/nacelle"
 	"github.com/jmoiron/sqlx"
 )
 

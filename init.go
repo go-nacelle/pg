@@ -1,7 +1,7 @@
-package nacellepg
+package pgutil
 
 import (
-	"github.com/efritz/nacelle"
+	"github.com/go-nacelle/nacelle"
 	_ "github.com/lib/pq"
 )
 
