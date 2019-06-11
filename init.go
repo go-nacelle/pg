@@ -6,8 +6,8 @@ import (
 )
 
 type Initializer struct {
-	Logger    nacelle.Logger           `service:"logger"`
-	Container nacelle.ServiceContainer `service:"container"`
+	Logger   nacelle.Logger           `service:"logger"`
+	Services nacelle.ServiceContainer `service:"services"`
 }
 
 const ServiceName = "db"
@@ -32,5 +32,5 @@ func (i *Initializer) Init(config nacelle.Config) error {
 		return err
 	}
 
-	return i.Container.Set(ServiceName, db)
+	return i.Services.Set(ServiceName, db)
 }
