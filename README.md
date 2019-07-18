@@ -6,7 +6,7 @@ Postgres utilities for use with nacelle.
 
 ### Usage
 
-This library creates a [sqlx](https://github.com/jmoiron/sqlx) connection wrapped in a nacelle [logger](https://github.com/go-nacelle/log). The supplied initializer adds this connection into the nacelle [service container](https://github.com/go-nacelle/service) under the key `db`. The initializer will block until a ping succeeds.
+This library creates a [sqlx](https://github.com/jmoiron/sqlx) connection wrapped in a nacelle [logger](https://nacelle.dev/docs/core/log). The supplied initializer adds this connection into the nacelle [service container](https://nacelle.dev/docs/core/service) under the key `db`. The initializer will block until a ping succeeds.
 
 ```go
 func setup(processes nacelle.ProcessContainer, services nacelle.ServiceContainer) error {
