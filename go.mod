@@ -1,10 +1,13 @@
 module github.com/go-nacelle/pgutil
 
+go 1.13
+
 require (
-	github.com/go-nacelle/nacelle v1.0.0
-	github.com/go-sql-driver/mysql v1.4.1 // indirect
+	github.com/aphistic/sweet v0.3.0
+	github.com/aphistic/sweet-junit v0.2.0
+	github.com/go-nacelle/nacelle v1.1.0
+	github.com/golang-migrate/migrate/v4 v4.7.0
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.1.1
-	github.com/mattn/go-sqlite3 v1.10.0 // indirect
-	google.golang.org/appengine v1.4.0 // indirect
+	github.com/lib/pq v1.2.0
+	github.com/onsi/gomega v1.7.1
 )
