@@ -41,9 +41,10 @@ func (i *Initializer) Init(config nacelle.Config) error {
 	if err := runMigrations(
 		db.DB.DB,
 		i.sourceDriver,
+		i.Logger,
 		dbConfig.MigrationsTable,
 		dbConfig.MigrationsSchemaName,
-		i.Logger,
+		dbConfig.FailOnNewerMigrationVersion,
 	); err != nil {
 		return err
 	}
