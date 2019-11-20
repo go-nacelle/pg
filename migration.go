@@ -69,10 +69,10 @@ func runMigrations(
 			return err
 		}
 
-		logger.Warning("Database is on future schema version %s", version)
+		logger.Warning("Current database schema is on a future version %s", version)
 		return nil
 	}
 
-	logger.Info("Finished migrations")
+	logger.Info("Database schema is up to date")
 	return nil
 }
