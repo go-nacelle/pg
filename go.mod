@@ -1,6 +1,6 @@
 module github.com/go-nacelle/pgutil
 
-go 1.13
+go 1.15
 
 require (
 	github.com/aphistic/sweet v0.3.0
