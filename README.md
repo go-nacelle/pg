@@ -1,4 +1,8 @@
-# Nacelle Postgres Utilities [![GoDoc](https://godoc.org/github.com/go-nacelle/pgutil?status.svg)](https://godoc.org/github.com/go-nacelle/pgutil) [![CircleCI](https://circleci.com/gh/go-nacelle/pgutil.svg?style=svg)](https://circleci.com/gh/go-nacelle/pgutil) [![Coverage Status](https://coveralls.io/repos/github/go-nacelle/pgutil/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/pgutil?branch=master)
+# Nacelle Postgres Utilities
+
+[![PkgGoDev](https://pkg.go.dev/badge/badge/github.com/go-nacelle/pgutil.svg)](https://pkg.go.dev/github.com/go-nacelle/pgutil)
+[![Build status](https://github.com/go-nacelle/pgutil/actions/workflows/test.yml/badge.svg)](https://github.com/go-nacelle/pgutil/actions/workflows/test.yml)
+[![Latest release](https://img.shields.io/github/release/go-nacelle/pgutil.svg)](https://github.com/go-nacelle/pgutil/releases/)
 
 Postgres utilities for use with nacelle.
 
