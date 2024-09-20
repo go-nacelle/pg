@@ -1,0 +1,432 @@
+pgutil.SchemaDescription{
+	Extensions: []pgutil.ExtensionDescription{
+		{
+			Namespace: "public",
+			Name:      "pg_trgm",
+		},
+		{
+			Namespace: "public",
+			Name:      "uuid-ossp",
+		},
+	},
+	Enums: []pgutil.EnumDescription{
+		{
+			Namespace: "public",
+			Name:      "mood",
+			Labels: []string{
+				"sad",
+				"ok",
+				"happy",
+			},
+		},
+		{
+			Namespace: "public",
+			Name:      "weather",
+			Labels: []string{
+				"sunny",
+				"rainy",
+				"cloudy",
+				"snowy",
+			},
+		},
+	},
+	Functions: []pgutil.FunctionDescription{
+		{
+			Namespace: "public",
+			Name:      "get_random_mood",
+			Definition: `CREATE OR REPLACE FUNCTION public.get_random_mood()
+ RETURNS mood
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN (ARRAY['sad', 'ok', 'happy'])[floor(random() * 3 + 1)];
+END;
+$function$
+`,
+			ArgTypes: []string{},
+		},
+		{
+			Namespace: "public",
+			Name:      "get_weather_description",
+			Definition: `CREATE OR REPLACE FUNCTION public.get_weather_description(w weather)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    CASE
+        WHEN w = 'sunny' THEN
+            RETURN 'Pack some SPF!';
+        WHEN w = 'rainy' THEN
+            RETURN 'Bring an umbrella!';
+        WHEN w = 'cloudy' THEN
+            RETURN 'Wear a jacket!';
+        WHEN w = 'snowy' THEN
+            RETURN 'Bundle up!';
+        ELSE
+            RETURN 'Unknown weather';
+    END CASE;
+END;
+$function$
+`,
+			ArgTypes: []string{"weather"},
+		},
+		{
+			Namespace: "public",
+			Name:      "update_last_modified",
+			Definition: `CREATE OR REPLACE FUNCTION public.update_last_modified()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.last_modified = NOW();
+    RETURN NEW;
+END;
+$function$
+`,
+			ArgTypes: []string{},
+		},
+	},
+	Tables: []pgutil.TableDescription{
+		{
+			Namespace: "public",
+			Name:      "comments",
+			Columns: []pgutil.ColumnDescription{
+				{
+					Name: "content",
+					Type: "text",
+				},
+				{
+					Name:       "created_at",
+					Type:       "timestamp with time zone",
+					IsNullable: true,
+					Default:    "CURRENT_TIMESTAMP",
+				},
+				{
+					Name:    "id",
+					Type:    "uuid",
+					Default: "uuid_generate_v4()",
+				},
+				{
+					Name: "post_id",
+					Type: "uuid",
+				},
+				{
+					Name: "user_id",
+					Type: "integer",
+				},
+			},
+			Constraints: []pgutil.ConstraintDescription{
+				{
+					Name:                "comments_post_id_fkey",
+					Type:                "f",
+					ReferencedTableName: "posts",
+					Definition:          "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE",
+				},
+				{
+					Name:                "comments_user_id_fkey",
+					Type:                "f",
+					ReferencedTableName: "users",
+					Definition:          "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+				},
+			},
+			Indexes: []pgutil.IndexDescription{
+				{
+					Name:                 "comments_pkey",
+					IsPrimaryKey:         true,
+					IsUnique:             true,
+					IndexDefinition:      "CREATE UNIQUE INDEX comments_pkey ON comments USING btree (id)",
+					ConstraintType:       "p",
+					ConstraintDefinition: "PRIMARY KEY (id)",
+				},
+				{
+					Name:            "idx_comments_post_id",
+					IndexDefinition: "CREATE INDEX idx_comments_post_id ON comments USING btree (post_id)",
+				},
+				{
+					Name:            "idx_comments_user_id",
+					IndexDefinition: "CREATE INDEX idx_comments_user_id ON comments USING btree (user_id)",
+				},
+			},
+		},
+		{
+			Namespace: "public",
+			Name:      "posts",
+			Columns: []pgutil.ColumnDescription{
+				{
+					Name:       "content",
+					Type:       "text",
+					IsNullable: true,
+				},
+				{
+					Name:       "created_at",
+					Type:       "timestamp with time zone",
+					IsNullable: true,
+					Default:    "CURRENT_TIMESTAMP",
+				},
+				{
+					Name:    "id",
+					Type:    "uuid",
+					Default: "uuid_generate_v4()",
+				},
+				{
+					Name:       "last_modified",
+					Type:       "timestamp with time zone",
+					IsNullable: true,
+					Default:    "CURRENT_TIMESTAMP",
+				},
+				{
+					Name:                   "title",
+					Type:                   "character varying(200)",
+					CharacterMaximumLength: 200,
+				},
+				{
+					Name: "user_id",
+					Type: "integer",
+				},
+			},
+			Constraints: []pgutil.ConstraintDescription{{
+				Name:                "posts_user_id_fkey",
+				Type:                "f",
+				ReferencedTableName: "users",
+				Definition:          "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+			}},
+			Indexes: []pgutil.IndexDescription{
+				{
+					Name:            "idx_posts_content_trgm",
+					IndexDefinition: "CREATE INDEX idx_posts_content_trgm ON posts USING gin (content gin_trgm_ops)",
+				},
+				{
+					Name:            "idx_posts_user_id",
+					IndexDefinition: "CREATE INDEX idx_posts_user_id ON posts USING btree (user_id)",
+				},
+				{
+					Name:                 "posts_pkey",
+					IsPrimaryKey:         true,
+					IsUnique:             true,
+					IndexDefinition:      "CREATE UNIQUE INDEX posts_pkey ON posts USING btree (id)",
+					ConstraintType:       "p",
+					ConstraintDefinition: "PRIMARY KEY (id)",
+				},
+			},
+		},
+		{
+			Namespace: "public",
+			Name:      "users",
+			Columns: []pgutil.ColumnDescription{
+				{
+					Name:       "created_at",
+					Type:       "timestamp with time zone",
+					IsNullable: true,
+					Default:    "CURRENT_TIMESTAMP",
+				},
+				{
+					Name:                   "email",
+					Type:                   "character varying(100)",
+					CharacterMaximumLength: 100,
+				},
+				{
+					Name:    "id",
+					Type:    "integer",
+					Default: "nextval('user_id_seq'::regclass)",
+				},
+				{
+					Name:       "last_modified",
+					Type:       "timestamp with time zone",
+					IsNullable: true,
+					Default:    "CURRENT_TIMESTAMP",
+				},
+				{
+					Name:       "mood",
+					Type:       "mood",
+					IsNullable: true,
+				},
+				{
+					Name:                   "password_hash",
+					Type:                   "character varying(100)",
+					CharacterMaximumLength: 100,
+				},
+				{
+					Name:                   "username",
+					Type:                   "character varying(50)",
+					CharacterMaximumLength: 50,
+				},
+			},
+			Indexes: []pgutil.IndexDescription{
+				{
+					Name:            "idx_users_email",
+					IndexDefinition: "CREATE INDEX idx_users_email ON users USING btree (email)",
+				},
+				{
+					Name:            "idx_users_username",
+					IndexDefinition: "CREATE INDEX idx_users_username ON users USING btree (username)",
+				},
+				{
+					Name:                 "users_email_key",
+					IsUnique:             true,
+					IndexDefinition:      "CREATE UNIQUE INDEX users_email_key ON users USING btree (email)",
+					ConstraintType:       "u",
+					ConstraintDefinition: "UNIQUE (email)",
+				},
+				{
+					Name:                 "users_pkey",
+					IsPrimaryKey:         true,
+					IsUnique:             true,
+					IndexDefinition:      "CREATE UNIQUE INDEX users_pkey ON users USING btree (id)",
+					ConstraintType:       "p",
+					ConstraintDefinition: "PRIMARY KEY (id)",
+				},
+				{
+					Name:                 "users_username_key",
+					IsUnique:             true,
+					IndexDefinition:      "CREATE UNIQUE INDEX users_username_key ON users USING btree (username)",
+					ConstraintType:       "u",
+					ConstraintDefinition: "UNIQUE (username)",
+				},
+			},
+		},
+	},
+	Sequences: []pgutil.SequenceDescription{{
+		Namespace:    "public",
+		Name:         "user_id_seq",
+		Type:         "bigint",
+		StartValue:   1000,
+		MinimumValue: 1,
+		MaximumValue: 9223372036854775807,
+		Increment:    1,
+		CycleOption:  "NO",
+	}},
+	Views: []pgutil.ViewDescription{
+		{
+			Namespace: "public",
+			Name:      "active_users",
+			Definition: ` SELECT id,
+    username,
+    email,
+    mood
+   FROM users
+  WHERE (last_modified > (CURRENT_TIMESTAMP - '30 days'::interval));`,
+		},
+		{
+			Namespace: "public",
+			Name:      "post_stats",
+			Definition: ` SELECT p.id AS post_id,
+    p.title,
+    p.user_id,
+    u.username,
+    count(c.id) AS comment_count
+   FROM ((posts p
+     JOIN users u ON ((p.user_id = u.id)))
+     LEFT JOIN comments c ON ((p.id = c.post_id)))
+  GROUP BY p.id, p.title, p.user_id, u.username;`,
+		},
+	},
+	Triggers: []pgutil.TriggerDescription{
+		{
+			Namespace:         "public",
+			Name:              "update_post_last_modified",
+			TableName:         "posts",
+			FunctionNamespace: "public",
+			Definition:        "CREATE TRIGGER update_post_last_modified BEFORE UPDATE ON posts FOR EACH ROW EXECUTE FUNCTION update_last_modified()",
+		},
+		{
+			Namespace:         "public",
+			Name:              "update_user_last_modified",
+			TableName:         "users",
+			FunctionNamespace: "public",
+			Definition:        "CREATE TRIGGER update_user_last_modified BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_last_modified()",
+		},
+	},
+	EnumDependencies: []pgutil.EnumDependency{{
+		EnumNamespace:  "public",
+		EnumName:       "mood",
+		TableNamespace: "public",
+		TableName:      "users",
+		ColumnName:     "mood",
+	}},
+	ColumnDependencies: []pgutil.ColumnDependency{
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "active_users",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "username",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "active_users",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "email",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "active_users",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "mood",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "active_users",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "last_modified",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "active_users",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "comments",
+			SourceColumnName:      "id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "comments",
+			SourceColumnName:      "post_id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "posts",
+			SourceColumnName:      "id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "posts",
+			SourceColumnName:      "user_id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "posts",
+			SourceColumnName:      "title",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "id",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+		{
+			SourceNamespace:       "public",
+			SourceTableOrViewName: "users",
+			SourceColumnName:      "username",
+			UsedNamespace:         "public",
+			UsedTableOrView:       "post_stats",
+		},
+	},
+}

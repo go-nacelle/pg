@@ -1,25 +1,23 @@
 package pgutil
 
 import (
-	"github.com/go-nacelle/nacelle"
-	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/go-nacelle/nacelle/v2"
 	_ "github.com/lib/pq"
 )
 
 type Initializer struct {
-	Logger       nacelle.Logger           `service:"logger"`
-	Services     nacelle.ServiceContainer `service:"services"`
-	sourceDriver source.Driver
+	Logger   nacelle.Logger           `service:"logger"`
+	Services nacelle.ServiceContainer `service:"services"`
 }
 
 const ServiceName = "db"
 
 func NewInitializer(configs ...ConfigFunc) *Initializer {
+	// For expansion
 	options := getOptions(configs)
+	_ = options
 
-	return &Initializer{
-		sourceDriver: options.sourceDriver,
-	}
+	return &Initializer{}
 }
 
 func (i *Initializer) Init(config nacelle.Config) error {
@@ -35,17 +33,6 @@ func (i *Initializer) Init(config nacelle.Config) error {
 
 	db, err := Dial(dbConfig.DatabaseURL, logger)
 	if err != nil {
-		return err
-	}
-
-	if err := runMigrations(
-		db.DB.DB,
-		i.sourceDriver,
-		i.Logger,
-		dbConfig.MigrationsTable,
-		dbConfig.MigrationsSchemaName,
-		dbConfig.FailOnNewerMigrationVersion,
-	); err != nil {
 		return err
 	}
 
